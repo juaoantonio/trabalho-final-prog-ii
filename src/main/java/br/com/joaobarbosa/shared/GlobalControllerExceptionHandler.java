@@ -43,7 +43,7 @@ public class GlobalControllerExceptionHandler {
 
         ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
         pd.setTitle("BadRequestException");
-        pd.setDetail("Validation failed");
+        pd.setDetail("Validação falhou");
         pd.setType(URI.create("about:blank#validation"));
         pd.setProperty("errors", errors);
         pd.setProperty("action", "Ajuste os campos inválidos e tente novamente.");
@@ -72,7 +72,7 @@ public class GlobalControllerExceptionHandler {
     // === JSON malformado / body ilegível → 400 ===
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ProblemDetail handleUnreadable() {
-        ProblemDetail pd = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Malformed JSON request body");
+        ProblemDetail pd = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "JSON enviado é inválido");
         pd.setTitle("BadRequestException");
         pd.setType(URI.create("about:blank#malformed-json"));
         pd.setProperty("action", "Verifique o JSON enviado.");
