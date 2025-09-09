@@ -9,5 +9,10 @@ public abstract class BaseClientException extends BaseHttpException {
         if (!status.is4xxClientError()) {
             throw new IllegalArgumentException("ClientErrorException deve usar um status 4xx");
         }
+    }  protected BaseClientException(String message, HttpStatus status, String action, String name, Throwable cause) {
+        super(message, status, action, name, cause);
+        if (!status.is4xxClientError()) {
+            throw new IllegalArgumentException("ClientErrorException deve usar um status 4xx");
+        }
     }
 }

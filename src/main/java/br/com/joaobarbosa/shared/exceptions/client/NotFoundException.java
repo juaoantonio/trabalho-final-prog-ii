@@ -22,4 +22,17 @@ public class NotFoundException extends BaseClientException {
   public NotFoundException(String message, String action) {
     super(message, HttpStatus.NOT_FOUND, action, BadRequestException.class.getSimpleName());
   }
+
+  public NotFoundException(String message, Throwable cause) {
+    super(
+        message,
+        HttpStatus.NOT_FOUND,
+        "Verifique se os parâmetros enviados na consulta estão certos.",
+        BadRequestException.class.getSimpleName(),
+        cause);
+  }
+
+  public NotFoundException(String message, String action, Throwable cause) {
+    super(message, HttpStatus.NOT_FOUND, action, BadRequestException.class.getSimpleName(), cause);
+  }
 }
