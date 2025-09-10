@@ -1,10 +1,15 @@
 package br.com.joaobarbosa.modules.users;
 
 import jakarta.persistence.*;
+
+import java.time.Instant;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -23,12 +28,20 @@ public class User implements UserDetails {
   @Column(unique = true, updatable = false, nullable = false)
   private String username;
 
-  @Column(nullable = false)
+  @Column(nullable = false, name = "hashed_password")
   private String hashedPassword;
 
   @Column(nullable = false)
   @Enumerated(EnumType.STRING)
   private UserRole role = UserRole.USER;
+
+  @CreationTimestamp
+  @Column(name = "created_at", updatable = false)
+  private Instant createdAt;
+
+  @UpdateTimestamp
+  @Column(name = "updated_at")
+  private Instant updatedAt;
 
   public User(String username, String encryptedPassword, UserRole role) {
     this.username = username;
