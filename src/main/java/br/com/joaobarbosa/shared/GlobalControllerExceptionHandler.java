@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -110,6 +111,18 @@ public class GlobalControllerExceptionHandler {
         pd.setTitle("NotFoundException");
         pd.setType(URI.create("about:blank#not-found"));
         pd.setProperty("action", "Verifique a URL e tente novamente.");
+        pd.setProperty("timestamp", OffsetDateTime.now());
+        return pd;
+    }
+
+    // === Method Not Allowed → 405 ===
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ProblemDetail handleMethodNotAllowed(HttpRequestMethodNotSupportedException ex) {
+        String detail = String.format("Método '%s' não é suportado para este endpoint", ex.getMethod());
+        ProblemDetail pd = ProblemDetail.forStatusAndDetail(HttpStatus.METHOD_NOT_ALLOWED, detail);
+        pd.setTitle("MethodNotAllowedException");
+        pd.setType(URI.create("about:blank#method-not-allowed"));
+        pd.setProperty("action", "Verifique o método HTTP utilizado.");
         pd.setProperty("timestamp", OffsetDateTime.now());
         return pd;
     }
