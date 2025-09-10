@@ -10,6 +10,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -106,16 +108,6 @@ public class GlobalControllerExceptionHandler {
     return pd;
   }
 
-    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
-    public ProblemDetail handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
-        String detail = String.format("Parâmetro '%s' deve ser do tipo `%s`", ex.getName(), ex.getRequiredType());
-        ProblemDetail pd = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, detail);
-        pd.setTitle("BadRequestException");
-        pd.setType(URI.create("about:blank#type-mismatch"));
-        pd.setProperty("action", "Corrija o tipo do parâmetro informado.");
-        pd.setProperty("timestamp", OffsetDateTime.now());
-        return pd;
-    }
   // === Tipo de parâmetro inválido → 400 ===
   @ExceptionHandler(MethodArgumentTypeMismatchException.class)
   public ProblemDetail handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
@@ -130,6 +122,29 @@ public class GlobalControllerExceptionHandler {
     return pd;
   }
 
+  @ExceptionHandler(BadCredentialsException.class)
+  public ProblemDetail handleBadCredentials(BadCredentialsException ex) {
+    log.error(ex.getMessage(), ex);
+    ProblemDetail pd =
+        ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, "Credenciais inválidas");
+    pd.setTitle("UnauthorizedException");
+    pd.setType(URI.create("about:blank#unauthorized"));
+    pd.setProperty("action", "Verifique suas credenciais e tente novamente.");
+    pd.setProperty("timestamp", OffsetDateTime.now());
+    return pd;
+  }
+
+  // === Acesso negado → 403 ===
+  @ExceptionHandler(AuthorizationDeniedException.class)
+  public ProblemDetail handleAuthorizationDenied(AuthorizationDeniedException ex) {
+    log.error(ex.getMessage(), ex);
+    ProblemDetail pd = ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN, "Acesso negado");
+    pd.setTitle("ForbiddenException");
+    pd.setType(URI.create("about:blank#forbidden"));
+    pd.setProperty("action", "Você não tem permissão para acessar este recurso.");
+    pd.setProperty("timestamp", OffsetDateTime.now());
+    return pd;
+  }
 
   // === Not Found → 404 ===
   @ExceptionHandler(NoResourceFoundException.class)

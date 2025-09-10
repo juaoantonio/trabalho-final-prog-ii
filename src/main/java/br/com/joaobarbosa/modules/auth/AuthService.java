@@ -14,14 +14,15 @@ import org.springframework.stereotype.Service;
 public class AuthService implements UserDetailsService {
   private final UserRepository userRepository;
 
-    @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return this.userRepository.findByUsername(username);
-    }
   @Override
   public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
     log.info("Iniciando o login do AuthService com usuário: {}", username);
     var result = this.userRepository.findByUsername(username);
+    if (result == null) {
+      log.warn("Usuário não encontrado no AuthService: {}", username);
+      throw new UsernameNotFoundException("Usuário não encontrado");
+    }
+    log.info("Usuário encontrado no AuthService: {}", username);
     return result;
   }
 }
