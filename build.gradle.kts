@@ -1,7 +1,11 @@
+import java.util.*
+
 plugins {
     id("java")
     id("org.springframework.boot") version "3.5.5"
     id("io.spring.dependency-management") version "1.1.7"
+    id("com.diffplug.spotless") version "7.2.1"
+    id("com.github.sherter.google-java-format") version "0.9"
 }
 
 group = "br.com.joaobarbosa"
@@ -10,6 +14,37 @@ version = "1.0-SNAPSHOT"
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+spotless {
+    // Opcional: limita a formatação apenas aos arquivos alterados em relação ao branch main
+    ratchetFrom("origin/main")
+
+    format("misc") {
+        // define os arquivos para aplicar a formatação "misc"
+        target("*.gradle", ".gitattributes", ".gitignore")
+
+        // define os passos de formatação
+        trimTrailingWhitespace()
+        leadingSpacesToTabs() // ou leadingTabsToSpaces(int) caso prefira espaços
+        endWithNewline()
+    }
+
+    java {
+        // não precisa definir target, o Spotless já infere
+
+        // aplica o Google Java Format com algumas opções extras
+        googleJavaFormat("1.17.0")
+            .aosp()
+            .reflowLongStrings()
+            .skipJavadocFormatting()
+
+        // corrige formatação de anotações de tipo
+        formatAnnotations()
+
+        // adiciona header de licença automático com ano
+        licenseHeader("/* (C)${Calendar.YEAR} */")
     }
 }
 
