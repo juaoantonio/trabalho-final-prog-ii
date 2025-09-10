@@ -1,4 +1,12 @@
+app:
+  name: TicketManager
+  api:
+    jwt:
+      secret: ${JWT_SECRET_KEY:default_secret_key}
+      issuer: TicketManagerAPI
+      expiration: 604800 # 7 days in seconds
 spring:
+
   application:
     name: TicketManager
 
