@@ -8,6 +8,7 @@ import br.com.joaobarbosa.modules.users.UserRepository;
 import br.com.joaobarbosa.shared.exceptions.client.BadRequestException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+@Slf4j
 @RestController
 @RequestMapping("auth")
 @RequiredArgsConstructor
@@ -29,6 +31,7 @@ public class AuthController {
   @PostMapping("login")
   @PublicEndpoint
   public ResponseEntity<LoginResponse> login(@RequestBody @Valid LoginRequest data) {
+    log.info("Iniciando login com o usuário: {}", data.username());
     var usernamePassword =
         new UsernamePasswordAuthenticationToken(data.username(), data.password());
     var authentication = authenticationManager.authenticate(usernamePassword);
@@ -40,6 +43,7 @@ public class AuthController {
   @PostMapping("register")
   @RequireAdmin
   public ResponseEntity<Void> register(@RequestBody @Valid RegistrationRequest data) {
+    log.info("Iniciando registro do usuário: {}", data.username());
     if (this.userRepository.findByUsername(data.username()) != null)
       throw new BadRequestException("Usuário já existe");
     var encryptedPassword = new BCryptPasswordEncoder().encode(data.password());
