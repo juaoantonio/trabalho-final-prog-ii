@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import br.com.joaobarbosa.shared.value_objects.Money;
 import java.math.BigDecimal;
+import java.util.Currency;
 import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -14,7 +15,7 @@ class OrderItemTest {
     @Test
     @DisplayName("Deve calcular preço final igual ao unitário quando não é meia")
     void finalPriceFull() {
-        Money unit = new Money(20);
+        Money unit = Money.of(20);
         OrderItem item =
                 OrderItem.builder()
                         .seatId(UUID.randomUUID())
@@ -23,14 +24,14 @@ class OrderItemTest {
                         .unitPrice(unit)
                         .build();
 
-        assertEquals(0, unit.getValue().compareTo(item.getFinalPrice().getValue()));
+        assertEquals(unit, item.getFinalPrice());
         assertEquals(unit.getCurrencyCode(), item.getFinalPrice().getCurrencyCode());
     }
 
     @Test
     @DisplayName("Deve calcular meia-entrada como metade do preço unitário")
     void finalPriceHalf() {
-        Money unit = new Money(30);
+        Money unit = Money.of(30);
         OrderItem item =
                 OrderItem.builder()
                         .seatId(UUID.randomUUID())
@@ -39,8 +40,8 @@ class OrderItemTest {
                         .unitPrice(unit)
                         .build();
 
-        Money expected = unit.multiply(new BigDecimal("0.5"));
-        assertEquals(0, expected.getValue().compareTo(item.getFinalPrice().getValue()));
+        Money expected = unit.times(new BigDecimal("0.5"));
+        assertEquals(expected, item.getFinalPrice());
         assertEquals(expected.getCurrencyCode(), item.getFinalPrice().getCurrencyCode());
     }
 
@@ -61,7 +62,7 @@ class OrderItemTest {
     @Test
     @DisplayName("Deve lançar exceção ao tentar calcular finalPrice com Money inconsistente")
     void finalPriceThrowsIfMoneyCurrencyInvalid() {
-        Money unit = new Money(10, "USD");
+        Money unit = Money.of(10, Currency.getInstance("USD"));
         OrderItem item =
                 OrderItem.builder()
                         .seatId(UUID.randomUUID())
@@ -71,6 +72,6 @@ class OrderItemTest {
                         .build();
 
         assertDoesNotThrow(() -> item.getFinalPrice());
-        assertEquals("USD", item.getFinalPrice().getCurrencyCode().getCurrencyCode());
+        assertEquals("USD", item.getFinalPrice().getCurrencyCode());
     }
 }
