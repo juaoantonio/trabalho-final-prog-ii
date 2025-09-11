@@ -1,7 +1,5 @@
-package br.com.joaobarbosa.service;
+package br.com.joaobarbosa.modules.rooms;
 
-import br.com.joaobarbosa.entity.Room;
-import br.com.joaobarbosa.repository.RoomRepository;
 import br.com.joaobarbosa.shared.exceptions.client.NotFoundException;
 import java.util.List;
 import java.util.Optional;

@@ -1,4 +1,4 @@
-package br.com.joaobarbosa.entity;
+package br.com.joaobarbosa.modules.rooms;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
