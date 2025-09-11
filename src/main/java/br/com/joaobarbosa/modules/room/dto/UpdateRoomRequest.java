@@ -1,4 +1,4 @@
-package br.com.joaobarbosa.dto;
+package br.com.joaobarbosa.modules.room.dto;
 
 import jakarta.validation.constraints.Min;
 

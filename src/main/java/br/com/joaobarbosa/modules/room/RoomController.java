@@ -1,10 +1,10 @@
-package br.com.joaobarbosa.controller;
+package br.com.joaobarbosa.modules.room;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import br.com.joaobarbosa.dto.UpdateRoomRequest;
+import br.com.joaobarbosa.modules.room.dto.UpdateRoomRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -16,9 +16,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import br.com.joaobarbosa.dto.CreateRoomRequest;
-import br.com.joaobarbosa.entity.Room;
-import br.com.joaobarbosa.service.RoomService;
+import br.com.joaobarbosa.modules.room.dto.CreateRoomRequest;
 import jakarta.validation.Valid;
 
 @RestController
