@@ -1,17 +1,22 @@
 package br.com.joaobarbosa.modules.orders;
 
+import br.com.joaobarbosa.modules.coupons.Coupon;
 import br.com.joaobarbosa.modules.users.User;
+import br.com.joaobarbosa.shared.exceptions.client.BadRequestException;
 import br.com.joaobarbosa.shared.value_objects.Money;
 import jakarta.persistence.*;
+
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-@Builder
+@Builder(setterPrefix = "with")
 @Entity(name = "orders")
 @Table(name = "orders")
 @EqualsAndHashCode(of = "id")
@@ -30,6 +35,10 @@ public class Order {
   @JoinColumn(name = "user_id", insertable = false, updatable = false)
   private User user;
 
+  @OneToOne(fetch = FetchType.LAZY, optional = true)
+  @JoinColumn(name = "coupon_id", referencedColumnName = "id")
+  private Coupon coupon;
+
   @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
   @Builder.Default
   private List<OrderItem> items = new ArrayList<>();
@@ -37,9 +46,6 @@ public class Order {
   @Column(nullable = false)
   @Enumerated(EnumType.STRING)
   private OrderStatus status;
-
-  @Column(name = "coupon_code")
-  private String couponCode;
 
   @CreationTimestamp
   @Column(name = "created_at", updatable = false)
@@ -56,8 +62,18 @@ public class Order {
 
   @Transient
   public Money getDiscountTotal() {
-    // TODO: Implementar lógica de cupom de desconto
-    return Money.ZERO;
+    if (coupon == null) return Money.ZERO;
+    switch (this.coupon.getType()) {
+      case FIXED -> {
+        return coupon.getValue();
+      }
+      case PERCENT -> {
+        return getSubtotal().calculatePercentageDiscountAmount(coupon.getValue());
+      }
+      default -> {
+        return Money.ZERO;
+      }
+    }
   }
 
   @Transient
@@ -74,6 +90,42 @@ public class Order {
     if (item == null) return;
     items.remove(item);
     item.setOrder(null);
+  }
+
+  public void applyCoupon(Coupon coupon) {
+    if (coupon.getIsActive() == false) {
+      throw new BadRequestException("Cupom inativo.", "Verifique o cupom informado.");
+    }
+    if (this.status == OrderStatus.CANCELLED || this.status == OrderStatus.PAID) {
+      throw new BadRequestException(
+          "Não é possível aplicar cupom em pedidos cancelados ou pagos.",
+          "Verifique o status do pedido.");
+    }
+    switch (coupon.getType()) {
+      case FIXED -> {
+        if (getSubtotal().subtract(coupon.getValue()).getValue().compareTo(BigDecimal.ZERO) < 0) {
+          throw new BadRequestException(
+              "O valor do cupom não pode ser maior que o subtotal do pedido.",
+              "Verifique o cupom informado.");
+        }
+      }
+      case PERCENT -> {
+        if (coupon.getValue().getValue().compareTo(new Money(100).getValue()) > 0) {
+          throw new BadRequestException(
+              "O valor do cupom percentual não pode ser maior que 100%.",
+              "Verifique o cupom informado.");
+        }
+      }
+      default -> {
+        throw new BadRequestException("Tipo de cupom inválido.", "Verifique o cupom informado.");
+      }
+    }
+    this.coupon = coupon;
+  }
+
+  public Optional<String> getCouponCode() {
+    if (this.coupon == null) return Optional.empty();
+    return Optional.of(coupon.getCode());
   }
 
   public boolean isPayable() {
